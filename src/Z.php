@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace Nyra\Zod;
 
+use InvalidArgumentException;
 use Nyra\Zod\Contracts\Schema;
+use Nyra\Zod\Errors\ZodError;
+use Nyra\Zod\Errors\ZodIssue;
 use Nyra\Zod\Schemas\AnySchema;
 use Nyra\Zod\Schemas\ArraySchema;
 use Nyra\Zod\Schemas\BaseSchema;
@@ -21,7 +24,6 @@ use Nyra\Zod\Schemas\NeverSchema;
 use Nyra\Zod\Schemas\NullSchema;
 use Nyra\Zod\Schemas\NumberSchema;
 use Nyra\Zod\Schemas\ObjectSchema;
-use Nyra\Zod\Schemas\OptionalSchema;
 use Nyra\Zod\Schemas\PipelineSchema;
 use Nyra\Zod\Schemas\PreprocessSchema;
 use Nyra\Zod\Schemas\RecordSchema;
@@ -32,6 +34,7 @@ use Nyra\Zod\Schemas\UnionSchema;
 use Nyra\Zod\Schemas\UnknownSchema;
 use Nyra\Zod\Schemas\VoidSchema;
 use Nyra\Zod\Serialization\JsonSchemaConverter;
+use UnitEnum;
 
 class Z
 {
@@ -109,17 +112,28 @@ class Z
      *    Z::enum([MyEnum::Case1, MyEnum::Case2])
      *
      * @param list<string|object> $values List of allowed values (string or PHP enum instance)
+     * @throws ZodError
      */
     public static function enum(array $values): EnumSchema
     {
-        $processed = array_map(function ($item) {
-            if (is_object($item) && enum_exists(get_class($item))) {
-                return $item->value;
+        $enumClass = null;
+
+        $processed = array_map(function ($item) use (&$enumClass) {
+            if ($item instanceof UnitEnum) {
+                $nextEnumClass = get_class($item);
+                if (!$enumClass) {
+                    $enumClass = $nextEnumClass;
+                } elseif ($enumClass !== $nextEnumClass) {
+                    throw new ZodError([
+                        new ZodIssue('invalid_schema', 'Expected enum variant from one enum type', [])
+                    ]);
+                }
             }
+
             return $item;
         }, $values);
 
-        return new EnumSchema($processed);
+        return new EnumSchema($processed, $enumClass);
     }
 
     /**
