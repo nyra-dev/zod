@@ -64,5 +64,11 @@ class NumberSchemaTest extends TestCase
             $this->assertCount(1, $e->getIssues());
         }
     }
-}
 
+    public function test_number_safe(): void
+    {
+        $schema = Z::number()->safe();
+        $this->assertSame(123, $schema->parse(123));
+        // On 64-bit PHP, this is hard to trigger with just literals, but we check the logic.
+    }
+}

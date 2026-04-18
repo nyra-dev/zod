@@ -38,5 +38,11 @@ class ArraySchemaTest extends TestCase
             $this->assertSame([1, 'name'], $issues[0]->path);
         }
     }
-}
 
+    public function test_array_element(): void
+    {
+        $element = Z::string();
+        $arr = Z::array($element);
+        $this->assertSame($element, $arr->element());
+    }
+}

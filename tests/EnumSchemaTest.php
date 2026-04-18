@@ -87,4 +87,18 @@ class EnumSchemaTest extends TestCase
         $this->expectException(ZodError::class);
         $schema->parse(MyStrBackedEnum::Case3);
     }
+
+    public function test_native_enum(): void
+    {
+        if (PHP_VERSION_ID < 80100) {
+            $this->markTestSkipped('PHP >= 8.1 required for native enums');
+        }
+
+        $schema = Z::nativeEnum(\Nyra\Zod\Tests\Fixtures\StatusEnum::class);
+        $this->assertSame('active', $schema->parse('active'));
+        $this->assertSame('pending', $schema->parse('pending'));
+
+        $this->expectException(ZodError::class);
+        $schema->parse('invalid');
+    }
 }

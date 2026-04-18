@@ -35,5 +35,17 @@ class TransformSchemaTest extends TestCase
 
         $this->assertSame(['value' => 20], $schema->parse([]));
     }
-}
 
+    public function test_pipeline_schema(): void
+    {
+        $schema = Z::string()->trim()->pipe(Z::string()->length(3));
+        $this->assertSame('abc', $schema->parse('  abc  '));
+
+        try {
+            $schema->parse('  abcd  ');
+            $this->fail('Should have thrown ZodError');
+        } catch (ZodError $e) {
+            $this->assertSame('too_big', $e->getIssues()[0]->code);
+        }
+    }
+}

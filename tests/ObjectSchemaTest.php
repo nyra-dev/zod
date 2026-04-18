@@ -110,5 +110,15 @@ class ObjectSchemaTest extends TestCase
 
         $this->assertSame(['a' => 'foo', 'b' => 123], $merged->parse(['a' => 'foo', 'b' => 123]));
     }
+
+    public function test_object_keyof(): void
+    {
+        $obj = Z::object(['name' => Z::string(), 'age' => Z::number()]);
+        $keySchema = $obj->keyof();
+        $this->assertSame('name', $keySchema->parse('name'));
+        $this->assertSame('age', $keySchema->parse('age'));
+        $this->expectException(ZodError::class);
+        $keySchema->parse('unknown');
+    }
 }
 

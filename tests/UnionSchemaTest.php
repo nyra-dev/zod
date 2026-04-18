@@ -44,5 +44,23 @@ class UnionSchemaTest extends TestCase
         $this->assertSame('abc', $schema->parse('abc'));
         $this->assertSame(123, $schema->parse(123));
     }
-}
 
+    public function test_discriminated_union_schema(): void
+    {
+        $schema = Z::discriminatedUnion('type', [
+            Z::object(['type' => Z::literal('a'), 'value' => Z::string()]),
+            Z::object(['type' => Z::literal('b'), 'value' => Z::number()]),
+        ]);
+
+        $this->assertSame(['type' => 'a', 'value' => 'foo'], $schema->parse(['type' => 'a', 'value' => 'foo']));
+        $this->assertSame(['type' => 'b', 'value' => 123], $schema->parse(['type' => 'b', 'value' => 123]));
+
+        // Invalid discriminator
+        try {
+            $schema->parse(['type' => 'c', 'value' => 'foo']);
+            $this->fail('Should have thrown ZodError');
+        } catch (ZodError $e) {
+            $this->assertSame('invalid_discriminator', $e->getIssues()[0]->code);
+        }
+    }
+}
