@@ -173,6 +173,11 @@ class ObjectSchema extends BaseSchema
         return new self($newShape);
     }
 
+    public function keyof(): EnumSchema
+    {
+        return new EnumSchema(array_keys($this->shape));
+    }
+
     private function isOptionalShapeMember(SchemaContract $schema): bool
     {
         return $schema instanceof BaseSchema && $schema->isOptionalLike();

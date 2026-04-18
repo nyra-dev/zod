@@ -217,6 +217,19 @@ class NumberSchema extends BaseSchema
         return $this;
     }
 
+    public function safe(string $message = 'Number is not within safe integer range'): self
+    {
+        $this->checks[] = function (mixed $value, array $path) use ($message): ?ZodIssue {
+            if (is_int($value) || is_float($value)) {
+                if ($value < PHP_INT_MIN || $value > PHP_INT_MAX) {
+                    return new ZodIssue('too_small', $message, $path);
+                }
+            }
+            return null;
+        };
+        return $this;
+    }
+
     public function isInteger(): bool
     {
         return $this->int;

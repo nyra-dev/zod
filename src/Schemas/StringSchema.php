@@ -122,6 +122,82 @@ class StringSchema extends BaseSchema
         return $this->regex('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $message);
     }
 
+    public function ip(array $options = []): self
+    {
+        $this->format = 'ip';
+        $version = $options['version'] ?? null;
+        $message = $options['message'] ?? 'Invalid IP address';
+
+        $flags = 0;
+        if ($version === 'v4') {
+            $flags = FILTER_FLAG_IPV4;
+        } elseif ($version === 'v6') {
+            $flags = FILTER_FLAG_IPV6;
+        }
+
+        $this->checks[] = function (mixed $value, array $path) use ($flags, $message): ?ZodIssue {
+            if (is_string($value) && filter_var($value, FILTER_VALIDATE_IP, $flags) === false) {
+                return new ZodIssue('invalid_string', $message, $path, ['validation' => 'ip']);
+            }
+            return null;
+        };
+        return $this;
+    }
+
+    public function cidr(array $options = []): self
+    {
+        $this->format = 'cidr';
+        $message = $options['message'] ?? 'Invalid CIDR';
+
+        $this->checks[] = function (mixed $value, array $path) use ($message): ?ZodIssue {
+            if (!is_string($value)) {
+                return null;
+            }
+
+            $parts = explode('/', $value);
+            if (count($parts) !== 2) {
+                return new ZodIssue('invalid_string', $message, $path, ['validation' => 'cidr']);
+            }
+
+            $ip = $parts[0];
+            $mask = $parts[1];
+
+            if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+                return new ZodIssue('invalid_string', $message, $path, ['validation' => 'cidr']);
+            }
+
+            if (!is_numeric($mask)) {
+                return new ZodIssue('invalid_string', $message, $path, ['validation' => 'cidr']);
+            }
+
+            $mask = (int)$mask;
+            $isV4 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+            $maxMask = $isV4 ? 32 : 128;
+
+            if ($mask < 0 || $mask > $maxMask) {
+                return new ZodIssue('invalid_string', $message, $path, ['validation' => 'cidr']);
+            }
+
+            return null;
+        };
+        return $this;
+    }
+
+    public function base64(string $message = 'Invalid base64 string'): self
+    {
+        $this->format = 'base64';
+        $this->checks[] = function (mixed $value, array $path) use ($message): ?ZodIssue {
+            if (is_string($value)) {
+                $decoded = base64_decode($value, true);
+                if ($decoded === false || base64_encode($decoded) !== $value) {
+                    return new ZodIssue('invalid_string', $message, $path, ['validation' => 'base64']);
+                }
+            }
+            return null;
+        };
+        return $this;
+    }
+
     public function min(int $min, string $message = 'String is too short'): self
     {
         if ($this->minLength === null || $min > $this->minLength) {

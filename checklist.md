@@ -51,7 +51,7 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [ ] `.catch()`
 - [x] `.or()` (Shorthand for union)
 - [x] `.and()` (Shorthand for intersection)
-- [ ] `.pipe()`
+- [x] `.pipe()`
 
 ## String Validations
 
@@ -66,17 +66,18 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.uuid()`
 - [ ] `.nanoid()`
 - [ ] `.cuid()` / `.cuid2()`
-- [ ] `.ulid()`
-- [ ] `.datetime()` (ISO 8601)
-- [ ] `.ip()`
-- [ ] `.cidr()`
+- [x] `.ulid()`
+- [x] `.datetime()` (ISO 8601)
+- [x] `.ip()`
+- [x] `.cidr()`
 - [x] `.startsWith()`
 - [x] `.endsWith()`
 - [x] `.includes()`
 - [x] `.trim()`
 - [x] `.toLowerCase()` / `.uppercase()`
 - [x] `.toUpperCase()` / `.lowercase()`
-- [ ] `.base64()`
+- [x] `.base64()`
+
 
 ## Number Validations
 
@@ -91,7 +92,7 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.finite()`
 - [x] `.gt()`
 - [x] `.lt()`
-- [ ] `.safe()`
+- [x] `.safe()`
 
 ## Object Methods
 
@@ -105,7 +106,7 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.partial()`
 - [ ] `.deepPartial()`
 - [x] `.required()`
-- [ ] `.keyof()`
+- [x] `.keyof()`
 
 ## Array Methods
 
@@ -113,7 +114,7 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.max()` / `.maxItems()`
 - [x] `.length()`
 - [x] `.nonempty()`
-- [ ] `.element` (Access element schema)
+- [x] `.element` (Access element schema)
 
 ## Coercion (`Z::coerce()`)
 

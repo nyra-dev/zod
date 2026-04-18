@@ -99,6 +99,11 @@ class ArraySchema extends BaseSchema
         return $this->max($max, $message);
     }
 
+    public function element(): SchemaContract
+    {
+        return $this->element;
+    }
+
     public function getElementSchema(): SchemaContract
     {
         return $this->element;

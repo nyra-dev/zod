@@ -27,7 +27,7 @@ use Nyra\Zod\Schemas\PreprocessSchema;
 use Nyra\Zod\Schemas\RecordSchema;
 use Nyra\Zod\Schemas\SetSchema;
 use Nyra\Zod\Schemas\StringSchema;
-
+use Nyra\Zod\Schemas\TupleSchema;
 use Nyra\Zod\Schemas\UnionSchema;
 use Nyra\Zod\Schemas\UnknownSchema;
 use Nyra\Zod\Schemas\VoidSchema;
@@ -226,6 +226,11 @@ class Z
     public static function coerce(): Coerce
     {
         return new Coerce();
+    }
+
+    public static function iso(): Iso
+    {
+        return new Iso();
     }
 
     /**
