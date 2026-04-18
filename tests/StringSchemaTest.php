@@ -46,5 +46,42 @@ class StringSchemaTest extends TestCase
         $this->expectException(ZodError::class);
         $s->parse('ab');
     }
+
+    public function test_starts_ends_includes(): void
+    {
+        $s = Z::string()->startsWith('foo')->endsWith('bar')->includes('middle');
+        $this->assertSame('foomiddlebar', $s->parse('foomiddlebar'));
+
+        $this->expectException(ZodError::class);
+        $s->parse('oomiddlebar');
+    }
+
+    public function test_trim_and_case(): void
+    {
+        $s = Z::string()->trim()->toLowerCase();
+        $this->assertSame('abc', $s->parse('  ABC  '));
+
+        $s2 = Z::string()->toUpperCase();
+        $this->assertSame('FOO', $s2->parse('foo'));
+    }
+
+    public function test_url(): void
+    {
+        $s = Z::string()->url();
+        $this->assertSame('https://google.com', $s->parse('https://google.com'));
+
+        $this->expectException(ZodError::class);
+        $s->parse('not-a-url');
+    }
+
+    public function test_uuid(): void
+    {
+        $s = Z::string()->uuid();
+        $uuid = '123e4567-e89b-12d3-a456-426614174000';
+        $this->assertSame($uuid, $s->parse($uuid));
+
+        $this->expectException(ZodError::class);
+        $s->parse('not-a-uuid');
+    }
 }
 

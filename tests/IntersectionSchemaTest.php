@@ -51,5 +51,11 @@ class IntersectionSchemaTest extends TestCase
             $this->assertSame(['name'], $issues[1]->path);
         }
     }
+
+    public function test_and(): void
+    {
+        $schema = Z::object(['a' => Z::string()])->and(Z::object(['b' => Z::number()]));
+        $this->assertSame(['a' => 'foo', 'b' => 123], $schema->parse(['a' => 'foo', 'b' => 123]));
+    }
 }
 

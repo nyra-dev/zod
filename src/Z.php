@@ -7,7 +7,9 @@ use Nyra\Zod\Contracts\Schema;
 use Nyra\Zod\Schemas\AnySchema;
 use Nyra\Zod\Schemas\ArraySchema;
 use Nyra\Zod\Schemas\BaseSchema;
+use Nyra\Zod\Schemas\BigIntSchema;
 use Nyra\Zod\Schemas\BooleanSchema;
+use Nyra\Zod\Schemas\DateSchema;
 use Nyra\Zod\Schemas\EnumSchema;
 use Nyra\Zod\Schemas\IntersectionSchema;
 use Nyra\Zod\Schemas\LazySchema;
@@ -36,9 +38,19 @@ class Z
         return new NumberSchema();
     }
 
+    public static function bigint(): BigIntSchema
+    {
+        return new BigIntSchema();
+    }
+
     public static function boolean(): BooleanSchema
     {
         return new BooleanSchema();
+    }
+
+    public static function date(): DateSchema
+    {
+        return new DateSchema();
     }
 
     public static function any(): AnySchema

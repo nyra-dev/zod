@@ -41,5 +41,28 @@ class NumberSchemaTest extends TestCase
         $negative = Z::number()->negative();
         $this->assertSame(-2, $negative->parse(-2));
     }
+
+    public function test_gt_lt(): void
+    {
+        $gt = Z::number()->gt(5);
+        $this->assertSame(6, $gt->parse(6));
+        
+        try {
+            $gt->parse(5);
+            $this->fail('Should have thrown ZodError');
+        } catch (ZodError $e) {
+            $this->assertCount(1, $e->getIssues());
+        }
+
+        $lt = Z::number()->lt(5);
+        $this->assertSame(4, $lt->parse(4));
+        
+        try {
+            $lt->parse(5);
+            $this->fail('Should have thrown ZodError');
+        } catch (ZodError $e) {
+            $this->assertCount(1, $e->getIssues());
+        }
+    }
 }
 

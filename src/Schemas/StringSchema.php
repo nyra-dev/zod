@@ -16,6 +16,10 @@ class StringSchema extends BaseSchema
 
     private ?string $format = null;
 
+    private bool $shouldTrim = false;
+
+    private ?int $case = null; // 1 for lower, 2 for upper
+
     public function parse(mixed $data): string
     {
         if (!is_string($data)) {
@@ -24,9 +28,98 @@ class StringSchema extends BaseSchema
             ]);
         }
 
+        if ($this->shouldTrim) {
+            $data = trim($data);
+        }
+
+        if ($this->case === 1) {
+            $data = mb_strtolower($data);
+        } elseif ($this->case === 2) {
+            $data = mb_strtoupper($data);
+        }
+
         $issues = $this->runChecks($data);
         $this->assertNoIssues($issues);
         return $data;
+    }
+
+    public function trim(): self
+    {
+        $this->shouldTrim = true;
+        return $this;
+    }
+
+    public function toLowerCase(): self
+    {
+        $this->case = 1;
+        return $this;
+    }
+
+    public function lowercase(): self
+    {
+        return $this->toLowerCase();
+    }
+
+    public function toUpperCase(): self
+    {
+        $this->case = 2;
+        return $this;
+    }
+
+    public function uppercase(): self
+    {
+        return $this->toUpperCase();
+    }
+
+    public function startsWith(string $prefix, string $message = 'String does not start with required prefix'): self
+    {
+        $this->checks[] = function (mixed $value, array $path) use ($prefix, $message): ?ZodIssue {
+            if (is_string($value) && !str_starts_with($value, $prefix)) {
+                return new ZodIssue('invalid_string', $message, $path, ['startsWith' => $prefix]);
+            }
+            return null;
+        };
+        return $this;
+    }
+
+    public function endsWith(string $suffix, string $message = 'String does not end with required suffix'): self
+    {
+        $this->checks[] = function (mixed $value, array $path) use ($suffix, $message): ?ZodIssue {
+            if (is_string($value) && !str_ends_with($value, $suffix)) {
+                return new ZodIssue('invalid_string', $message, $path, ['endsWith' => $suffix]);
+            }
+            return null;
+        };
+        return $this;
+    }
+
+    public function includes(string $substring, string $message = 'String does not include required substring'): self
+    {
+        $this->checks[] = function (mixed $value, array $path) use ($substring, $message): ?ZodIssue {
+            if (is_string($value) && !str_contains($value, $substring)) {
+                return new ZodIssue('invalid_string', $message, $path, ['includes' => $substring]);
+            }
+            return null;
+        };
+        return $this;
+    }
+
+    public function url(string $message = 'Invalid URL'): self
+    {
+        $this->format = 'url';
+        $this->checks[] = function (mixed $value, array $path) use ($message): ?ZodIssue {
+            if (is_string($value) && filter_var($value, FILTER_VALIDATE_URL) === false) {
+                return new ZodIssue('invalid_string', $message, $path, ['validation' => 'url']);
+            }
+            return null;
+        };
+        return $this;
+    }
+
+    public function uuid(string $message = 'Invalid UUID'): self
+    {
+        $this->format = 'uuid';
+        return $this->regex('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $message);
     }
 
     public function min(int $min, string $message = 'String is too short'): self

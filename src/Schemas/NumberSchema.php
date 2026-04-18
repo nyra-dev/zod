@@ -55,6 +55,25 @@ class NumberSchema extends BaseSchema
         return $this;
     }
 
+    public function gt(float $value, string $message = 'Number must be greater than required value'): self
+    {
+        if ($this->exclusiveMinimum === null || $value > $this->exclusiveMinimum) {
+            $this->exclusiveMinimum = $value;
+        }
+
+        if ($this->minimum !== null && $this->minimum <= $this->exclusiveMinimum) {
+            $this->minimum = null;
+        }
+
+        $this->checks[] = function (mixed $v, array $path) use ($value, $message): ?ZodIssue {
+            if ((is_int($v) || is_float($v)) && $v <= $value) {
+                return new ZodIssue('too_small', $message, $path, ['exclusiveMinimum' => $value]);
+            }
+            return null;
+        };
+        return $this;
+    }
+
     public function max(float $max, string $message = 'Number is too big'): self
     {
         if ($this->maximum === null || $max < $this->maximum) {
@@ -68,6 +87,25 @@ class NumberSchema extends BaseSchema
         $this->checks[] = function (mixed $value, array $path) use ($max, $message): ?ZodIssue {
             if ((is_int($value) || is_float($value)) && $value > $max) {
                 return new ZodIssue('too_big', $message, $path, ['maximum' => $max]);
+            }
+            return null;
+        };
+        return $this;
+    }
+
+    public function lt(float $value, string $message = 'Number must be less than required value'): self
+    {
+        if ($this->exclusiveMaximum === null || $value < $this->exclusiveMaximum) {
+            $this->exclusiveMaximum = $value;
+        }
+
+        if ($this->maximum !== null && $this->maximum >= $this->exclusiveMaximum) {
+            $this->maximum = null;
+        }
+
+        $this->checks[] = function (mixed $v, array $path) use ($value, $message): ?ZodIssue {
+            if ((is_int($v) || is_float($v)) && $v >= $value) {
+                return new ZodIssue('too_big', $message, $path, ['exclusiveMaximum' => $value]);
             }
             return null;
         };

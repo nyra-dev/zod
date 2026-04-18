@@ -13,6 +13,12 @@ class OptionalSchema extends BaseSchema
 
     public function parse(mixed $data): mixed
     {
+        if ($data === null) {
+            $issues = $this->runChecks($data);
+            $this->assertNoIssues($issues);
+            return null;
+        }
+
         $value = $this->inner->parse($data);
 
         $issues = $this->runChecks($value);

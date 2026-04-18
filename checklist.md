@@ -21,8 +21,8 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `Z::record()`
 - [x] `Z::lazy()`
 - [x] `Z::preprocess()`
-- [ ] `Z::bigint()`
-- [ ] `Z::date()`
+- [x] `Z::bigint()`
+- [x] `Z::date()`
 - [ ] `Z::symbol()` (Likely N/A for PHP)
 - [ ] `Z::undefined()` (PHP typically uses `null`)
 - [ ] `Z::void()`
@@ -49,8 +49,8 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [ ] `.superRefine()`
 - [ ] `.describe()`
 - [ ] `.catch()`
-- [ ] `.or()` (Shorthand for union)
-- [ ] `.and()` (Shorthand for intersection)
+- [x] `.or()` (Shorthand for union)
+- [x] `.and()` (Shorthand for intersection)
 - [ ] `.pipe()`
 
 ## String Validations
@@ -61,21 +61,21 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.email()`
 - [x] `.regex()`
 - [x] `.nonempty()`
-- [ ] `.url()`
+- [x] `.url()`
 - [ ] `.emoji()`
-- [ ] `.uuid()`
+- [x] `.uuid()`
 - [ ] `.nanoid()`
 - [ ] `.cuid()` / `.cuid2()`
 - [ ] `.ulid()`
 - [ ] `.datetime()` (ISO 8601)
 - [ ] `.ip()`
 - [ ] `.cidr()`
-- [ ] `.startsWith()`
-- [ ] `.endsWith()`
-- [ ] `.includes()`
-- [ ] `.trim()`
-- [ ] `.toLowerCase()` / `.uppercase()`
-- [ ] `.toUpperCase()` / `.lowercase()`
+- [x] `.startsWith()`
+- [x] `.endsWith()`
+- [x] `.includes()`
+- [x] `.trim()`
+- [x] `.toLowerCase()` / `.uppercase()`
+- [x] `.toUpperCase()` / `.lowercase()`
 - [ ] `.base64()`
 
 ## Number Validations
@@ -89,8 +89,8 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.nonpositive()`
 - [x] `.multipleOf()` / `.step()`
 - [x] `.finite()`
-- [ ] `.gt()`
-- [ ] `.lt()`
+- [x] `.gt()`
+- [x] `.lt()`
 - [ ] `.safe()`
 
 ## Object Methods
@@ -99,12 +99,12 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.passthrough()`
 - [x] `.strict()`
 - [x] `.strip()`
-- [ ] `.merge()`
-- [ ] `.pick()`
-- [ ] `.omit()`
-- [ ] `.partial()`
+- [x] `.merge()`
+- [x] `.pick()`
+- [x] `.omit()`
+- [x] `.partial()`
 - [ ] `.deepPartial()`
-- [ ] `.required()`
+- [x] `.required()`
 - [ ] `.keyof()`
 
 ## Array Methods

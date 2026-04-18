@@ -110,6 +110,11 @@ class ObjectSchema extends BaseSchema
         return $this;
     }
 
+    public function merge(ObjectSchema $other): self
+    {
+        return $this->extend($other->getShape());
+    }
+
     public function getShape(): array
     {
         return $this->shape;
@@ -118,6 +123,54 @@ class ObjectSchema extends BaseSchema
     public function getUnknownStrategy(): string
     {
         return $this->unknownStrategy;
+    }
+
+    /**
+     * @param string[] $keys
+     */
+    public function pick(array $keys): self
+    {
+        $newShape = [];
+        foreach ($keys as $key) {
+            if (isset($this->shape[$key])) {
+                $newShape[$key] = $this->shape[$key];
+            }
+        }
+        return new self($newShape);
+    }
+
+    /**
+     * @param string[] $keys
+     */
+    public function omit(array $keys): self
+    {
+        $newShape = $this->shape;
+        foreach ($keys as $key) {
+            unset($newShape[$key]);
+        }
+        return new self($newShape);
+    }
+
+    public function partial(): self
+    {
+        $newShape = [];
+        foreach ($this->shape as $key => $schema) {
+            $newShape[$key] = $schema->optional();
+        }
+        return new self($newShape);
+    }
+
+    public function required(): self
+    {
+        $newShape = [];
+        foreach ($this->shape as $key => $schema) {
+            if ($schema instanceof OptionalSchema) {
+                $newShape[$key] = $schema->getInner();
+            } else {
+                $newShape[$key] = $schema;
+            }
+        }
+        return new self($newShape);
     }
 
     private function isOptionalShapeMember(SchemaContract $schema): bool

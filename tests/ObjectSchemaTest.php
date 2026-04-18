@@ -69,5 +69,46 @@ class ObjectSchemaTest extends TestCase
             'createdAt' => 'PENDING',
         ], $parsed);
     }
+
+    public function test_pick_and_omit(): void
+    {
+        $base = Z::object([
+            'a' => Z::string(),
+            'b' => Z::string(),
+            'c' => Z::string(),
+        ]);
+
+        $picked = $base->pick(['a', 'c']);
+        $this->assertSame(['a' => '1', 'c' => '3'], $picked->parse(['a' => '1', 'b' => '2', 'c' => '3']));
+        $this->assertArrayNotHasKey('b', $picked->parse(['a' => '1', 'b' => '2', 'c' => '3']));
+
+        $omitted = $base->omit(['b']);
+        $this->assertSame(['a' => '1', 'c' => '3'], $omitted->parse(['a' => '1', 'b' => '2', 'c' => '3']));
+    }
+
+    public function test_partial_and_required(): void
+    {
+        $base = Z::object([
+            'name' => Z::string(),
+            'age' => Z::number(),
+        ]);
+
+        $partial = $base->partial();
+        $this->assertSame(['name' => 'Ada'], $partial->parse(['name' => 'Ada']));
+        $this->assertSame([], $partial->parse([]));
+
+        $required = $partial->required();
+        $this->expectException(ZodError::class);
+        $required->parse(['name' => 'Ada']); // age is missing
+    }
+
+    public function test_merge(): void
+    {
+        $obj1 = Z::object(['a' => Z::string()]);
+        $obj2 = Z::object(['b' => Z::number()]);
+        $merged = $obj1->merge($obj2);
+
+        $this->assertSame(['a' => 'foo', 'b' => 123], $merged->parse(['a' => 'foo', 'b' => 123]));
+    }
 }
 

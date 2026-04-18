@@ -49,6 +49,16 @@ abstract class BaseSchema implements SchemaContract
         return new PreprocessSchema($preprocess, $this);
     }
 
+    public function or(SchemaContract $other): SchemaContract
+    {
+        return new UnionSchema([$this, $other]);
+    }
+
+    public function and(SchemaContract $other): SchemaContract
+    {
+        return new IntersectionSchema($this, $other);
+    }
+
     public function isOptionalLike(): bool
     {
         return false;

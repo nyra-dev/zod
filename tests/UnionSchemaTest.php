@@ -37,5 +37,12 @@ class UnionSchemaTest extends TestCase
             $this->assertGreaterThanOrEqual(1, count($issues[0]->params['errors']));
         }
     }
+
+    public function test_or(): void
+    {
+        $schema = Z::string()->or(Z::number());
+        $this->assertSame('abc', $schema->parse('abc'));
+        $this->assertSame(123, $schema->parse(123));
+    }
 }
 
