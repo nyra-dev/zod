@@ -10,20 +10,27 @@ use Nyra\Zod\Schemas\BaseSchema;
 use Nyra\Zod\Schemas\BigIntSchema;
 use Nyra\Zod\Schemas\BooleanSchema;
 use Nyra\Zod\Schemas\DateSchema;
+use Nyra\Zod\Schemas\DiscriminatedUnionSchema;
 use Nyra\Zod\Schemas\EnumSchema;
 use Nyra\Zod\Schemas\IntersectionSchema;
 use Nyra\Zod\Schemas\LazySchema;
 use Nyra\Zod\Schemas\LiteralSchema;
+use Nyra\Zod\Schemas\MapSchema;
+use Nyra\Zod\Schemas\NanSchema;
 use Nyra\Zod\Schemas\NeverSchema;
 use Nyra\Zod\Schemas\NullSchema;
 use Nyra\Zod\Schemas\NumberSchema;
 use Nyra\Zod\Schemas\ObjectSchema;
+use Nyra\Zod\Schemas\OptionalSchema;
+use Nyra\Zod\Schemas\PipelineSchema;
 use Nyra\Zod\Schemas\PreprocessSchema;
 use Nyra\Zod\Schemas\RecordSchema;
+use Nyra\Zod\Schemas\SetSchema;
 use Nyra\Zod\Schemas\StringSchema;
-use Nyra\Zod\Schemas\TupleSchema;
+
 use Nyra\Zod\Schemas\UnionSchema;
 use Nyra\Zod\Schemas\UnknownSchema;
+use Nyra\Zod\Schemas\VoidSchema;
 use Nyra\Zod\Serialization\JsonSchemaConverter;
 
 class Z
@@ -63,9 +70,24 @@ class Z
         return new UnknownSchema();
     }
 
+    public static function void(): VoidSchema
+    {
+        return new VoidSchema();
+    }
+
+    public static function undefined(): VoidSchema
+    {
+        return new VoidSchema();
+    }
+
     public static function never(): NeverSchema
     {
         return new NeverSchema();
+    }
+
+    public static function nan(): NanSchema
+    {
+        return new NanSchema();
     }
 
     public static function null(): NullSchema
@@ -101,11 +123,35 @@ class Z
     }
 
     /**
+     * Accepts a PHP enum class name and extracts its values.
+     *
+     * @param class-string $enumClass
+     */
+    public static function nativeEnum(string $enumClass): EnumSchema
+    {
+        if (!enum_exists($enumClass)) {
+            throw new InvalidArgumentException("Class {$enumClass} is not a PHP Enum");
+        }
+
+        $values = array_map(fn($case) => $case->value, $enumClass::cases());
+        return new EnumSchema($values);
+    }
+
+    /**
      * @param Schema[] $schemas
      */
     public static function union(array $schemas): UnionSchema
     {
         return new UnionSchema($schemas);
+    }
+
+    /**
+     * @param string $discriminator
+     * @param ObjectSchema[] $options
+     */
+    public static function discriminatedUnion(string $discriminator, array $options): DiscriminatedUnionSchema
+    {
+        return new DiscriminatedUnionSchema($discriminator, $options);
     }
 
     /**
@@ -148,6 +194,21 @@ class Z
     public static function lazy(callable $factory): LazySchema
     {
         return new LazySchema($factory);
+    }
+
+    public static function map(Schema $key, Schema $value): MapSchema
+    {
+        return new MapSchema($key, $value);
+    }
+
+    public static function set(Schema $element): SetSchema
+    {
+        return new SetSchema($element);
+    }
+
+    public static function pipeline(Schema $left, Schema $right): PipelineSchema
+    {
+        return new PipelineSchema($left, $right);
     }
 
     /**

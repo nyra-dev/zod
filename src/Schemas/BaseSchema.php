@@ -59,6 +59,11 @@ abstract class BaseSchema implements SchemaContract
         return new IntersectionSchema($this, $other);
     }
 
+    public function pipe(SchemaContract $other): SchemaContract
+    {
+        return new PipelineSchema($this, $other);
+    }
+
     public function isOptionalLike(): bool
     {
         return false;

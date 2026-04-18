@@ -24,16 +24,16 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `Z::bigint()`
 - [x] `Z::date()`
 - [ ] `Z::symbol()` (Likely N/A for PHP)
-- [ ] `Z::undefined()` (PHP typically uses `null`)
-- [ ] `Z::void()`
-- [ ] `Z::nan()`
-- [ ] `Z::map()`
-- [ ] `Z::set()`
+- [x] `Z::undefined()` (PHP typically uses `null`)
+- [x] `Z::void()`
+- [x] `Z::nan()`
+- [x] `Z::map()`
+- [x] `Z::set()`
 - [ ] `Z::promise()` (N/A)
 - [ ] `Z::function()` (N/A)
-- [ ] `Z::discriminatedUnion()`
-- [ ] `Z::nativeEnum()` (Partially covered by `Z::enum()`)
-- [ ] `Z::pipeline()` / `.pipe()`
+- [x] `Z::discriminatedUnion()`
+- [x] `Z::nativeEnum()` (Partially covered by `Z::enum()`)
+- [x] `Z::pipeline()` / `.pipe()`
 - [ ] `Z::brand()`
 
 ## Common Methods (Base Schema)
