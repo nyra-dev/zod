@@ -32,7 +32,6 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [ ] `Z::promise()` (N/A)
 - [ ] `Z::function()` (N/A)
 - [x] `Z::discriminatedUnion()`
-- [x] `Z::nativeEnum()` (Partially covered by `Z::enum()`)
 - [x] `Z::pipeline()` / `.pipe()`
 - [ ] `Z::brand()`
 
