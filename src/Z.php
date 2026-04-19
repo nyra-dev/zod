@@ -137,6 +137,21 @@ class Z
     }
 
     /**
+     * Accepts a PHP enum class name and extracts its values.
+     *
+     * @param class-string $enumClass
+     */
+    public static function nativeEnum(string $enumClass): EnumSchema
+    {
+        if (!enum_exists($enumClass)) {
+            throw new InvalidArgumentException("Class {$enumClass} is not a PHP Enum");
+        }
+
+        $values = array_map(fn($case) => $case->value, $enumClass::cases());
+        return new EnumSchema($values);
+    }
+
+    /**
      * @param Schema[] $schemas
      */
     public static function union(array $schemas): UnionSchema
