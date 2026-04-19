@@ -126,4 +126,63 @@ class StringSchemaTest extends TestCase
         $this->expectException(ZodError::class);
         $schema->parse('!!!not-base64!!!');
     }
+
+    public function test_emoji_validation(): void
+    {
+        $schema = Z::string()->emoji();
+        $this->assertSame('😀', $schema->parse('😀'));
+        $this->assertSame('🚀🔥', $schema->parse('🚀🔥'));
+
+        $this->expectException(ZodError::class);
+        $schema->parse('no emoji');
+    }
+
+    public function test_nanoid_validation(): void
+    {
+        $schema = Z::string()->nanoid();
+        $id = 'V1StGXR8_Z5jdHi6B-myT';
+        $this->assertSame($id, $schema->parse($id));
+
+        $this->expectException(ZodError::class);
+        $schema->parse('too-short');
+    }
+
+    public function test_cuid_validation(): void
+    {
+        $schema = Z::string()->cuid();
+        $id = 'clj0ghrt0000008l1013je37q';
+        $this->assertSame($id, $schema->parse($id));
+
+        $this->expectException(ZodError::class);
+        $schema->parse('not-a-cuid');
+    }
+
+    public function test_ulid_validation(): void
+    {
+        $schema = Z::string()->ulid();
+        $id = '01ARZ3NDEKTSV4RRFFQ6KHGGEB';
+        $this->assertSame($id, $schema->parse($id));
+
+        $this->expectException(ZodError::class);
+        $schema->parse('not-a-ulid');
+    }
+
+    public function test_datetime_validation(): void
+    {
+        $schema = Z::string()->datetime();
+        $this->assertSame('2023-01-01T12:00:00Z', $schema->parse('2023-01-01T12:00:00Z'));
+        $this->assertSame('2023-01-01T12:00:00.000Z', $schema->parse('2023-01-01T12:00:00.000Z'));
+
+        $this->expectException(ZodError::class);
+        $schema->parse('2023-01-01');
+    }
+
+    public function test_cuid2_validation(): void
+    {
+        $schema = Z::string()->cuid2();
+        $this->assertSame('a1b2c3d4e5f6g7h8i9j0', $schema->parse('a1b2c3d4e5f6g7h8i9j0'));
+
+        $this->expectException(ZodError::class);
+        $schema->parse('1abc'); // Must start with a letter
+    }
 }

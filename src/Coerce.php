@@ -84,5 +84,57 @@ class Coerce
             return $value;
         });
     }
+
+    public function bigint(): PreprocessSchema
+    {
+        return Z::bigint()->preprocess(static function (mixed $value): mixed {
+            if ($value === null || is_int($value)) {
+                return $value;
+            }
+
+            if (is_bool($value)) {
+                return $value ? 1 : 0;
+            }
+
+            if (is_string($value)) {
+                $trimmed = trim($value);
+                if ($trimmed === '') {
+                    return $value;
+                }
+                if (preg_match('/^-?\d+$/', $trimmed)) {
+                    return (int) $trimmed;
+                }
+            }
+
+            if (is_float($value)) {
+                return (int) $value;
+            }
+
+            return $value;
+        });
+    }
+
+    public function date(): PreprocessSchema
+    {
+        return Z::date()->preprocess(static function (mixed $value): mixed {
+            if ($value === null || $value instanceof \DateTimeInterface) {
+                return $value;
+            }
+
+            if (is_int($value)) {
+                return (new \DateTimeImmutable())->setTimestamp($value);
+            }
+
+            if (is_string($value)) {
+                try {
+                    return new \DateTimeImmutable($value);
+                } catch (\Exception) {
+                    return $value;
+                }
+            }
+
+            return $value;
+        });
+    }
 }
 

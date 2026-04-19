@@ -33,7 +33,7 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [ ] `Z::function()` (N/A)
 - [x] `Z::discriminatedUnion()`
 - [x] `Z::pipeline()` / `.pipe()`
-- [ ] `Z::brand()`
+- [x] `Z::brand()`
 
 ## Common Methods (Base Schema)
 
@@ -45,9 +45,9 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.transform()`
 - [x] `.preprocess()`
 - [x] `.refine()`
-- [ ] `.superRefine()`
-- [ ] `.describe()`
-- [ ] `.catch()`
+- [x] `.superRefine()`
+- [x] `.describe()`
+- [x] `.catch()`
 - [x] `.or()` (Shorthand for union)
 - [x] `.and()` (Shorthand for intersection)
 - [x] `.pipe()`
@@ -61,10 +61,10 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.regex()`
 - [x] `.nonempty()`
 - [x] `.url()`
-- [ ] `.emoji()`
+- [x] `.emoji()`
 - [x] `.uuid()`
-- [ ] `.nanoid()`
-- [ ] `.cuid()` / `.cuid2()`
+- [x] `.nanoid()`
+- [x] `.cuid()` / `.cuid2()`
 - [x] `.ulid()`
 - [x] `.datetime()` (ISO 8601)
 - [x] `.ip()`
@@ -103,7 +103,7 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.pick()`
 - [x] `.omit()`
 - [x] `.partial()`
-- [ ] `.deepPartial()`
+- [x] `.deepPartial()`
 - [x] `.required()`
 - [x] `.keyof()`
 
@@ -120,15 +120,15 @@ This checklist tracks the implementation status of Zod features in the PHP versi
 - [x] `.string()`
 - [x] `.number()`
 - [x] `.boolean()`
-- [ ] `.bigint()`
-- [ ] `.date()`
+- [x] `.bigint()`
+- [x] `.date()`
 
 ## JSON Schema Features
 
 - [x] `Z::jsonSchema()` (Export to JSON Schema)
 - [ ] `Z::fromJSONSchema()` (Convert JSON Schema to Zod)
 - [ ] Support for JSON Schema `target` (Draft 4, 7, 2020-12, OpenAPI 3.0)
-- [ ] Metadata / Registry support (title, description, etc.)
+- [x] Metadata / Registry support (title, description, etc.)
 - [ ] Custom `override` logic for conversion
 - [ ] Cyclic schema support via `$ref`
 - [ ] Reused schema extraction via `$defs`

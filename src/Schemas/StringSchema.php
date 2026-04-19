@@ -198,6 +198,48 @@ class StringSchema extends BaseSchema
         return $this;
     }
 
+    public function emoji(string $message = 'Invalid emoji'): self
+    {
+        $this->format = 'emoji';
+        return $this->regex('/^(\p{Emoji_Presentation}|\p{Emoji}\x{FE0F})+$/u', $message);
+    }
+
+    public function nanoid(string $message = 'Invalid nanoid'): self
+    {
+        $this->format = 'nanoid';
+        return $this->regex('/^[a-z0-9_-]{21}$/i', $message);
+    }
+
+    public function cuid(string $message = 'Invalid cuid'): self
+    {
+        $this->format = 'cuid';
+        return $this->regex('/^c[^\s-]{8,}$/i', $message);
+    }
+
+    public function cuid2(string $message = 'Invalid cuid2'): self
+    {
+        $this->format = 'cuid2';
+        return $this->regex('/^[a-z][a-z0-9]*$/', $message);
+    }
+
+    public function ulid(string $message = 'Invalid ULID'): self
+    {
+        $this->format = 'ulid';
+        return $this->regex('/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/i', $message);
+    }
+
+    public function datetime(array $options = []): self
+    {
+        $message = $options['message'] ?? 'Invalid datetime';
+        $this->format = 'datetime';
+        return $this->refine(function ($value) {
+            if (\DateTime::createFromFormat(\DateTimeInterface::ATOM, $value) !== false) return true;
+            if (\DateTime::createFromFormat('Y-m-d\TH:i:s.uP', $value) !== false) return true;
+            if (\DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $value) !== false) return true;
+            return false;
+        }, $message);
+    }
+
     public function min(int $min, string $message = 'String is too short'): self
     {
         if ($this->minLength === null || $min > $this->minLength) {

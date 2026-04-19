@@ -160,6 +160,19 @@ class ObjectSchema extends BaseSchema
         return new self($newShape);
     }
 
+    public function deepPartial(): self
+    {
+        $newShape = [];
+        foreach ($this->shape as $key => $schema) {
+            if ($schema instanceof ObjectSchema) {
+                $newShape[$key] = $schema->deepPartial()->optional();
+            } else {
+                $newShape[$key] = $schema->optional();
+            }
+        }
+        return new self($newShape);
+    }
+
     public function required(): self
     {
         $newShape = [];

@@ -8,6 +8,8 @@ use Nyra\Zod\Schemas\AnySchema;
 use Nyra\Zod\Schemas\ArraySchema;
 use Nyra\Zod\Schemas\BaseSchema;
 use Nyra\Zod\Schemas\BooleanSchema;
+use Nyra\Zod\Schemas\BrandedSchema;
+use Nyra\Zod\Schemas\CatchSchema;
 use Nyra\Zod\Schemas\DefaultSchema;
 use Nyra\Zod\Schemas\EnumSchema;
 use Nyra\Zod\Schemas\IntersectionSchema;
@@ -49,7 +51,7 @@ final class JsonSchemaConverter
     }
 
     /**
-     * @return array{schema: array<string, mixed>, nullable: bool, optional: bool, hasDefault: bool, default: mixed}
+     * @return array{schema: array<string, mixed>, nullable: bool, optional: bool, hasDefault: bool, default: mixed, description: ?string}
      */
     private static function describe(SchemaContract $schema): array
     {
@@ -58,6 +60,7 @@ final class JsonSchemaConverter
             'optional' => false,
             'hasDefault' => false,
             'default' => null,
+            'description' => null,
         ];
 
         $core = self::unwrap($schema, $meta);
@@ -71,9 +74,17 @@ final class JsonSchemaConverter
                 $meta['hasDefault'] = true;
                 $meta['default'] = $core->getDefaultValue();
             }
+
+            if ($meta['description'] === null) {
+                $meta['description'] = $core->getDescription();
+            }
         }
 
         $json = self::buildCore($core);
+
+        if ($meta['description'] !== null) {
+            $json['description'] = $meta['description'];
+        }
 
         return [
             'schema' => $json,
@@ -81,14 +92,19 @@ final class JsonSchemaConverter
             'optional' => $meta['optional'],
             'hasDefault' => $meta['hasDefault'],
             'default' => $meta['default'],
+            'description' => $meta['description'],
         ];
     }
 
     /**
-     * @param array{nullable: bool, optional: bool, hasDefault: bool, default: mixed} $meta
+     * @param array{nullable: bool, optional: bool, hasDefault: bool, default: mixed, description: ?string} $meta
      */
     private static function unwrap(SchemaContract $schema, array &$meta): SchemaContract
     {
+        if ($schema instanceof BaseSchema && $meta['description'] === null) {
+            $meta['description'] = $schema->getDescription();
+        }
+
         if ($schema instanceof NullableSchema) {
             $meta['nullable'] = true;
             return self::unwrap($schema->getInner(), $meta);
@@ -103,6 +119,14 @@ final class JsonSchemaConverter
             $meta['optional'] = true;
             $meta['hasDefault'] = true;
             $meta['default'] = $schema->getDefaultValue();
+            return self::unwrap($schema->getInner(), $meta);
+        }
+
+        if ($schema instanceof BrandedSchema) {
+            return self::unwrap($schema->getInner(), $meta);
+        }
+
+        if ($schema instanceof CatchSchema) {
             return self::unwrap($schema->getInner(), $meta);
         }
 

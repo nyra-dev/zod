@@ -11,8 +11,10 @@ use LogicException;
 
 abstract class BaseSchema implements SchemaContract
 {
-    /** @var array<callable(mixed, array<int|string>):?ZodIssue> */
+    /** @var array<callable(mixed, array<int|string>):(?ZodIssue|ZodIssue[])> */
     protected array $checks = [];
+
+    protected ?string $description = null;
 
     public function safeParse(mixed $data): ParseResult
     {
@@ -64,6 +66,27 @@ abstract class BaseSchema implements SchemaContract
         return new PipelineSchema($this, $other);
     }
 
+    public function describe(string $description): static
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function catch(mixed $value): SchemaContract
+    {
+        return new CatchSchema($this, $value);
+    }
+
+    public function brand(string $brand): BrandedSchema
+    {
+        return new BrandedSchema($this, $brand);
+    }
+
     public function isOptionalLike(): bool
     {
         return false;
@@ -108,6 +131,20 @@ abstract class BaseSchema implements SchemaContract
     }
 
     /**
+     * @param callable(mixed, RefinementContext): void $refinement
+     */
+    public function superRefine(callable $refinement): static
+    {
+        $this->checks[] = function (mixed $value, array $path) use ($refinement): array {
+            $ctx = new RefinementContext($path);
+            $refinement($value, $ctx);
+            return $ctx->getIssues();
+        };
+
+        return $this;
+    }
+
+    /**
      * Helper to run queued checks, returning array of issues (possibly empty).
      *
      * @param mixed $value
@@ -118,9 +155,11 @@ abstract class BaseSchema implements SchemaContract
     {
         $issues = [];
         foreach ($this->checks as $check) {
-            $issue = $check($value, $path);
-            if ($issue instanceof ZodIssue) {
-                $issues[] = $issue;
+            $issueOrIssues = $check($value, $path);
+            if ($issueOrIssues instanceof ZodIssue) {
+                $issues[] = $issueOrIssues;
+            } elseif (is_array($issueOrIssues)) {
+                $issues = array_merge($issues, $issueOrIssues);
             }
         }
         return $issues;
