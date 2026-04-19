@@ -25,4 +25,24 @@ class MapSchemaTest extends TestCase
             $this->assertSame(['a'], $e->getIssues()[0]->path);
         }
     }
+
+    public function test_map_invalid_type(): void
+    {
+        $schema = Z::map(Z::string(), Z::number());
+        $this->expectException(ZodError::class);
+        $schema->parse('not-an-array');
+    }
+
+    public function test_map_key_error(): void
+    {
+        // Use an integer as key which string schema should fail on if strict (but PHP casts int keys in arrays)
+        // Let's use a more complex key schema if possible, or just force a mismatch
+        $schema = Z::map(Z::string()->min(5), Z::number());
+        try {
+            $schema->parse(['abc' => 1]);
+            $this->fail();
+        } catch (ZodError $e) {
+            $this->assertSame('too_small', $e->getIssues()[0]->code);
+        }
+    }
 }

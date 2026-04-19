@@ -185,4 +185,31 @@ class StringSchemaTest extends TestCase
         $this->expectException(ZodError::class);
         $schema->parse('1abc'); // Must start with a letter
     }
+
+    public function test_email_validation(): void
+    {
+        $schema = Z::string()->email();
+        $this->assertSame('test@example.com', $schema->parse('test@example.com'));
+        
+        $this->expectException(ZodError::class);
+        $schema->parse('not-an-email');
+    }
+
+    public function test_regex_validation(): void
+    {
+        $schema = Z::string()->regex('/^[a-z]+$/');
+        $this->assertSame('abc', $schema->parse('abc'));
+        
+        $this->expectException(ZodError::class);
+        $schema->parse('123');
+    }
+
+    public function test_getters(): void
+    {
+        $schema = Z::string()->min(5)->max(10)->regex('/foo/')->email();
+        $this->assertEquals(5, $schema->getMinLength());
+        $this->assertEquals(10, $schema->getMaxLength());
+        $this->assertEquals('/foo/', $schema->getPattern());
+        $this->assertEquals('email', $schema->getFormat());
+    }
 }

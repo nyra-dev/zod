@@ -21,5 +21,24 @@ class NullableOptionalTest extends TestCase
         $this->expectException(ZodError::class);
         $schema->parse(['maybe' => 123]);
     }
+
+    public function test_nullable_metadata_and_getters(): void
+    {
+        $inner = Z::string()->optional()->default('foo');
+        $schema = $inner->nullable();
+        
+        $this->assertSame($inner, $schema->getInner());
+        $this->assertTrue($schema->isOptionalLike());
+        $this->assertTrue($schema->hasDefault());
+        $this->assertEquals('foo', $schema->getDefaultValue());
+    }
+
+    public function test_nullable_with_non_base_inner(): void
+    {
+        // NullableSchema with something that doesn't inherit BaseSchema if possible
+        // But most our schemas do. Let's just check the fallback logic.
+        $schema = Z::string()->nullable();
+        $this->assertFalse($schema->hasDefault());
+    }
 }
 

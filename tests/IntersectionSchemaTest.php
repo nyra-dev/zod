@@ -57,5 +57,28 @@ class IntersectionSchemaTest extends TestCase
         $schema = Z::object(['a' => Z::string()])->and(Z::object(['b' => Z::number()]));
         $this->assertSame(['a' => 'foo', 'b' => 123], $schema->parse(['a' => 'foo', 'b' => 123]));
     }
+
+    public function test_intersection_metadata_and_getters(): void
+    {
+        $left = Z::string()->optional()->default('foo');
+        $right = Z::string();
+        $schema = Z::intersection($left, $right);
+        
+        $this->assertTrue($schema->isOptionalLike());
+        $this->assertTrue($schema->hasDefault());
+        $this->assertEquals('foo', $schema->getDefaultValue());
+        
+        $this->assertSame($left, $schema->getLeft());
+        $this->assertSame($right, $schema->getRight());
+    }
+
+    public function test_intersection_non_array_merge(): void
+    {
+        $schema = Z::intersection(Z::string(), Z::string());
+        $this->assertSame('foo', $schema->parse('foo'));
+        
+        $schema2 = Z::intersection(Z::string(), Z::any());
+        $this->assertSame('foo', $schema2->parse('foo'));
+    }
 }
 

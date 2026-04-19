@@ -91,4 +91,152 @@ class JsonSchemaConverterTest extends TestCase
             'required' => ['name', 'summary', 'description'],
         ], $json);
     }
+
+    public function test_boolean_and_null_schema(): void
+    {
+        $this->assertSame(['type' => 'boolean'], Z::jsonSchema(Z::boolean()));
+        $this->assertSame(['type' => 'null'], Z::jsonSchema(Z::null()));
+    }
+
+    public function test_literal_schema(): void
+    {
+        $this->assertSame(['enum' => [42], 'type' => 'integer'], Z::jsonSchema(Z::literal(42)));
+        $this->assertSame(['enum' => ['foo'], 'type' => 'string'], Z::jsonSchema(Z::literal('foo')));
+        $this->assertSame(['enum' => [true], 'type' => 'boolean'], Z::jsonSchema(Z::literal(true)));
+    }
+
+    public function test_number_schema(): void
+    {
+        $schema = Z::number()->min(1)->max(10)->int();
+        $json = Z::jsonSchema($schema);
+        $this->assertSame(['type' => 'integer', 'minimum' => 1.0, 'maximum' => 10.0], $json);
+    }
+
+    public function test_union_schema(): void
+    {
+        $schema = Z::union([Z::string(), Z::number()]);
+        $json = Z::jsonSchema($schema);
+        $this->assertSame([
+            'anyOf' => [
+                ['type' => 'string'],
+                ['type' => 'number'],
+            ],
+        ], $json);
+    }
+
+    public function test_intersection_schema(): void
+    {
+        $schema = Z::intersection(Z::object(['a' => Z::string()]), Z::object(['b' => Z::number()]));
+        $json = Z::jsonSchema($schema);
+        $this->assertSame([
+            'allOf' => [
+                [
+                    'type' => 'object',
+                    'properties' => ['a' => ['type' => 'string']],
+                    'additionalProperties' => false,
+                    'required' => ['a'],
+                ],
+                [
+                    'type' => 'object',
+                    'properties' => ['b' => ['type' => 'number']],
+                    'additionalProperties' => false,
+                    'required' => ['b'],
+                ],
+            ],
+        ], $json);
+    }
+
+    public function test_record_schema(): void
+    {
+        $schema = Z::record(Z::number(), Z::string());
+        $json = Z::jsonSchema($schema);
+        $this->assertSame([
+            'type' => 'object',
+            'additionalProperties' => ['type' => 'number'],
+            'propertyNames' => ['type' => 'string'],
+        ], $json);
+    }
+
+    public function test_nullable_optional_default(): void
+    {
+        $schema = Z::string()->nullable()->optional()->default('foo');
+        $json = Z::jsonSchema($schema);
+        $this->assertSame([
+            'type' => ['string', 'null'],
+            'default' => 'foo',
+        ], $json);
+    }
+
+    public function test_strict_and_passthrough_object(): void
+    {
+        $strict = Z::object(['a' => Z::string()])->strict();
+        $passthrough = Z::object(['a' => Z::string()])->passthrough();
+        $this->assertFalse(Z::jsonSchema($strict)['additionalProperties']);
+        $this->assertTrue(Z::jsonSchema($passthrough)['additionalProperties']);
+    }
+
+    public function test_tuple_schema(): void
+    {
+        $schema = Z::tuple([Z::string(), Z::number()])->rest(Z::boolean());
+        $json = Z::jsonSchema($schema);
+        $this->assertSame([
+            'type' => 'array',
+            'prefixItems' => [
+                ['type' => 'string'],
+                ['type' => 'number'],
+            ],
+            'minItems' => 2,
+            'items' => ['type' => 'boolean'],
+        ], $json);
+    }
+
+    public function test_never_schema(): void
+    {
+        $this->assertEquals(['not' => new \stdClass()], Z::jsonSchema(Z::never()));
+    }
+
+    public function test_any_unknown_schema(): void
+    {
+        $this->assertSame([], Z::jsonSchema(Z::any()));
+        $this->assertSame([], Z::jsonSchema(Z::unknown()));
+    }
+
+    public function test_lazy_schema_throws(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        Z::jsonSchema(Z::lazy(fn() => Z::string()));
+    }
+
+    public function test_literal_edge_cases(): void
+    {
+        $this->assertSame(['enum' => [3.14], 'type' => 'number'], Z::jsonSchema(Z::literal(3.14)));
+        $this->assertSame(['enum' => [null], 'type' => 'null'], Z::jsonSchema(Z::literal(null)));
+    }
+
+    public function test_description_is_preserved(): void
+    {
+        $schema = Z::string()->describe('A simple string');
+        $json = Z::jsonSchema($schema);
+        $this->assertSame('A simple string', $json['description']);
+    }
+
+    public function test_wrappers_unwrapping(): void
+    {
+        $schema = Z::string()
+            ->brand('foo')
+            ->catch('bar')
+            ->transform(fn($v) => $v)
+            ->preprocess(fn($v) => $v);
+        
+        $json = Z::jsonSchema($schema);
+        $this->assertSame('string', $json['type']);
+    }
+
+    public function test_union_with_nullable(): void
+    {
+        $schema = Z::union([Z::string(), Z::number()])->nullable();
+        $json = Z::jsonSchema($schema);
+        $this->assertCount(3, $json['anyOf']);
+        $this->assertSame(['type' => 'null'], $json['anyOf'][2]);
+    }
 }

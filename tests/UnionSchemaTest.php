@@ -62,5 +62,85 @@ class UnionSchemaTest extends TestCase
         } catch (ZodError $e) {
             $this->assertSame('invalid_discriminator', $e->getIssues()[0]->code);
         }
+
+        // Missing discriminator key
+        try {
+            $schema->parse(['value' => 'foo']);
+            $this->fail('Should have thrown ZodError');
+        } catch (ZodError $e) {
+            $this->assertSame('invalid_discriminator', $e->getIssues()[0]->code);
+        }
+
+        // Data not array
+        try {
+            $schema->parse('not an array');
+            $this->fail('Should have thrown ZodError');
+        } catch (ZodError $e) {
+            $this->assertSame('invalid_type', $e->getIssues()[0]->code);
+        }
+    }
+
+    public function test_discriminated_union_with_enum_discriminator(): void
+    {
+        $schema = Z::discriminatedUnion('kind', [
+            Z::object(['kind' => Z::enum(['x', 'y']), 'value' => Z::string()]),
+        ]);
+        $this->assertSame(['kind' => 'x', 'value' => 'foo'], $schema->parse(['kind' => 'x', 'value' => 'foo']));
+        $this->assertSame(['kind' => 'y', 'value' => 'bar'], $schema->parse(['kind' => 'y', 'value' => 'bar']));
+        try {
+            $schema->parse(['kind' => 'z', 'value' => 'baz']);
+            $this->fail('Should have thrown ZodError');
+        } catch (ZodError $e) {
+            $this->assertSame('invalid_discriminator', $e->getIssues()[0]->code);
+        }
+    }
+
+    public function test_discriminated_union_invalid_literal_type(): void
+    {
+        try {
+            Z::discriminatedUnion('type', [
+                Z::object(['type' => Z::literal([]), 'value' => Z::string()]),
+            ]);
+            $this->fail('Should have thrown InvalidArgumentException');
+        } catch (\InvalidArgumentException $e) {
+            $this->assertStringContainsString('Discriminator literal must be string or int', $e->getMessage());
+        }
+    }
+
+    public function test_discriminated_union_invalid_discriminator_schema(): void
+    {
+        try {
+            Z::discriminatedUnion('type', [
+                Z::object(['type' => Z::number(), 'value' => Z::string()]),
+            ]);
+            $this->fail('Should have thrown InvalidArgumentException');
+        } catch (\InvalidArgumentException $e) {
+            $this->assertStringContainsString('Discriminator schema must be Z::literal() or Z::enum()', $e->getMessage());
+        }
+    }
+
+    public function test_discriminated_union_missing_discriminator_in_option(): void
+    {
+        try {
+            Z::discriminatedUnion('type', [
+                Z::object(['other' => Z::literal('a')]),
+            ]);
+            $this->fail();
+        } catch (\InvalidArgumentException $e) {
+            $this->assertStringContainsString('must contain the discriminator key', $e->getMessage());
+        }
+    }
+
+    public function test_union_empty_throws(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Z::union([]);
+    }
+
+    public function test_union_getters(): void
+    {
+        $options = [Z::string()];
+        $schema = Z::union($options);
+        $this->assertSame($options, $schema->getOptions());
     }
 }

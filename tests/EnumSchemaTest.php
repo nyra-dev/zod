@@ -101,4 +101,30 @@ class EnumSchemaTest extends TestCase
         $this->expectException(ZodError::class);
         $schema->parse('invalid');
     }
+
+    public function test_enum_empty_throws(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Z::enum([]);
+    }
+
+    public function test_enum_mixed_types_throws(): void
+    {
+        $this->expectException(ZodError::class);
+        Z::enum([MyEnum::Case1, MyStrBackedEnum::Case1]);
+    }
+
+    public function test_native_enum_invalid_class_throws(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        /** @noinspection PhpParamsInspection */
+        Z::nativeEnum(\stdClass::class);
+    }
+
+    public function test_enum_getters(): void
+    {
+        $values = ['a', 'b'];
+        $schema = Z::enum($values);
+        $this->assertSame($values, $schema->values());
+    }
 }

@@ -71,4 +71,53 @@ class NumberSchemaTest extends TestCase
         $this->assertSame(123, $schema->parse(123));
         // On 64-bit PHP, this is hard to trigger with just literals, but we check the logic.
     }
+
+    public function test_finite(): void
+    {
+        $schema = Z::number()->finite();
+        $this->assertSame(1.5, $schema->parse(1.5));
+        
+        $this->expectException(ZodError::class);
+        $schema->parse(INF);
+    }
+
+    public function test_nonnegative_nonpositive(): void
+    {
+        $schema = Z::number()->nonnegative();
+        $this->assertSame(0, $schema->parse(0));
+        $this->assertSame(1, $schema->parse(1));
+        
+        try {
+            $schema->parse(-0.1);
+            $this->fail();
+        } catch (ZodError) { }
+
+        $schema = Z::number()->nonpositive();
+        $this->assertSame(0, $schema->parse(0));
+        $this->assertSame(-1, $schema->parse(-1));
+        
+        try {
+            $schema->parse(0.1);
+            $this->fail();
+        } catch (ZodError) { }
+    }
+
+    public function test_multiple_of_zero_throws(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Z::number()->multipleOf(0);
+    }
+
+    public function test_getters(): void
+    {
+        $schema = Z::number()->min(10)->max(20)->int();
+        $this->assertEquals(10, $schema->getMinimum());
+        $this->assertEquals(20, $schema->getMaximum());
+        $this->assertTrue($schema->isInteger());
+        
+        $schema = Z::number()->gt(5)->lt(25)->multipleOf(2);
+        $this->assertEquals(5, $schema->getExclusiveMinimum());
+        $this->assertEquals(25, $schema->getExclusiveMaximum());
+        $this->assertEquals(2, $schema->getMultipleOf());
+    }
 }

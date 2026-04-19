@@ -31,5 +31,13 @@ class LazySchemaTest extends TestCase
         $this->expectException(ZodError::class);
         $node->parse(['value' => 'nope']);
     }
+
+    public function test_lazy_factory_invalid_return_throws(): void
+    {
+        $schema = Z::lazy(fn() => 'not-a-schema');
+        $this->expectException(\InvalidArgumentException::class);
+        /** @noinspection PhpParamsInspection */
+        $schema->parse('foo');
+    }
 }
 

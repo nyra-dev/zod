@@ -31,5 +31,23 @@ class PreprocessSchemaTest extends TestCase
         $this->expectException(ZodError::class);
         $schema->parse('2');
     }
+
+    public function test_preprocess_metadata_proxies(): void
+    {
+        $inner = Z::string()->optional()->default('foo');
+        $schema = Z::preprocess(fn($v) => $v, $inner);
+        
+        $this->assertTrue($schema->isOptionalLike());
+        $this->assertTrue($schema->hasDefault());
+        $this->assertEquals('foo', $schema->getDefaultValue());
+    }
+
+    public function test_preprocess_invalid_call(): void
+    {
+        $schema = Z::preprocess(fn($v) => $v, Z::string());
+        $this->expectException(\BadMethodCallException::class);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $schema->nonExistentMethod();
+    }
 }
 

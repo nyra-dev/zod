@@ -44,5 +44,31 @@ class ArraySchemaTest extends TestCase
         $element = Z::string();
         $arr = Z::array($element);
         $this->assertSame($element, $arr->element());
+        $this->assertSame($element, $arr->getElementSchema());
+    }
+
+    public function test_array_nonempty(): void
+    {
+        $schema = Z::array(Z::string())->nonempty();
+        $this->assertSame(['a'], $schema->parse(['a']));
+        
+        $this->expectException(ZodError::class);
+        $schema->parse([]);
+    }
+
+    public function test_array_min_max_items_aliases(): void
+    {
+        $schema = Z::array(Z::string())->minItems(2)->maxItems(2);
+        $this->assertSame(['a', 'b'], $schema->parse(['a', 'b']));
+        
+        $this->assertEquals(2, $schema->getMinItemsConstraint());
+        $this->assertEquals(2, $schema->getMaxItemsConstraint());
+    }
+
+    public function test_array_invalid_type(): void
+    {
+        $schema = Z::array(Z::string());
+        $this->expectException(ZodError::class);
+        $schema->parse('not-an-array');
     }
 }

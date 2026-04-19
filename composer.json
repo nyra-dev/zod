@@ -35,7 +35,8 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "scripts": {
-        "test": "@php vendor/bin/phpunit"
+        "test": "@php vendor/bin/phpunit",
+        "coverage": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text"
     },
     "config": {
         "sort-packages": true

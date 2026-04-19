@@ -120,5 +120,51 @@ class ObjectSchemaTest extends TestCase
         $this->expectException(ZodError::class);
         $keySchema->parse('unknown');
     }
+
+    public function test_object_invalid_type(): void
+    {
+        $schema = Z::object(['a' => Z::string()]);
+        $this->expectException(ZodError::class);
+        $schema->parse('not-an-array');
+    }
+
+    public function test_object_strip(): void
+    {
+        $schema = Z::object(['a' => Z::string()])->passthrough()->strip();
+        $this->assertSame(['a' => 'foo'], $schema->parse(['a' => 'foo', 'b' => 'bar']));
+    }
+
+    public function test_object_deep_partial(): void
+    {
+        $schema = Z::object([
+            'user' => Z::object([
+                'name' => Z::string(),
+                'address' => Z::object([
+                    'city' => Z::string(),
+                ]),
+            ]),
+        ])->deepPartial();
+
+        $this->assertSame(['user' => ['address' => []]], $schema->parse(['user' => ['address' => []]]));
+    }
+
+    public function test_default_schema_metadata_and_getters(): void
+    {
+        $inner = Z::string();
+        $schema = $inner->default('foo');
+        
+        $this->assertSame($inner, $schema->getInner());
+        $this->assertTrue($schema->isOptionalLike());
+        $this->assertTrue($schema->hasDefault());
+        $this->assertEquals('foo', $schema->getDefaultValue());
+        
+        // Test callable default
+        $schema2 = $inner->default(fn() => 'bar');
+        $this->assertEquals('bar', $schema2->getDefaultValue());
+        
+        // Test nullable/optional overrides
+        $this->assertInstanceOf(\Nyra\Zod\Schemas\NullableSchema::class, $schema->nullable());
+        $this->assertSame($schema, $schema->optional());
+    }
 }
 

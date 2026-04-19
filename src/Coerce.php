@@ -11,7 +11,7 @@ class Coerce
     {
         return Z::string()->preprocess(static function (mixed $value): mixed {
             if ($value === null) {
-                return $value;
+                return '';
             }
 
             if (is_string($value)) {
@@ -34,7 +34,7 @@ class Coerce
     {
         return Z::number()->preprocess(static function (mixed $value): mixed {
             if ($value === null) {
-                return $value;
+                return 0;
             }
 
             if (is_int($value) || is_float($value)) {
@@ -48,7 +48,7 @@ class Coerce
             if (is_string($value)) {
                 $trimmed = trim($value);
                 if ($trimmed === '') {
-                    return $value;
+                    return 0;
                 }
 
                 if (is_numeric($trimmed)) {
@@ -63,6 +63,10 @@ class Coerce
     public function boolean(): PreprocessSchema
     {
         return Z::boolean()->preprocess(static function (mixed $value): mixed {
+            if ($value === null) {
+                return false;
+            }
+
             if (is_bool($value)) {
                 return $value;
             }
@@ -88,7 +92,11 @@ class Coerce
     public function bigint(): PreprocessSchema
     {
         return Z::bigint()->preprocess(static function (mixed $value): mixed {
-            if ($value === null || is_int($value)) {
+            if ($value === null) {
+                return 0;
+            }
+
+            if (is_int($value)) {
                 return $value;
             }
 
@@ -99,7 +107,7 @@ class Coerce
             if (is_string($value)) {
                 $trimmed = trim($value);
                 if ($trimmed === '') {
-                    return $value;
+                    return 0;
                 }
                 if (preg_match('/^-?\d+$/', $trimmed)) {
                     return (int) $trimmed;
@@ -117,8 +125,12 @@ class Coerce
     public function date(): PreprocessSchema
     {
         return Z::date()->preprocess(static function (mixed $value): mixed {
-            if ($value === null || $value instanceof \DateTimeInterface) {
+            if ($value instanceof \DateTimeInterface) {
                 return $value;
+            }
+
+            if ($value === null) {
+                return $value; // Still return null, as Date has no obvious default coercion
             }
 
             if (is_int($value)) {
